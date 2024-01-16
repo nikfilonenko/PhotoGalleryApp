@@ -7,4 +7,8 @@
     <color name="light_blue_A200">#FF40C4FF</color>
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
+    <color name="colorButtonGreyBg">#444444</color>
+    <color name="colorAccent">#e7a942</color>
+    <color name="colorPrimary">#1a1a18</color>
+    <color name="colorPrimaryDark">#80000000</color>
 </resources>

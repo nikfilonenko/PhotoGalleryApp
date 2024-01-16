@@ -7,7 +7,7 @@ plugins {
 android {
     compileSdk = 34
     defaultConfig {
-        applicationId = "com.robertlevonyan.demo.camerax"
+        applicationId = "com.example.photogalleryapp"
         minSdk = 21
         targetSdk = 34
         versionCode = 1
@@ -30,7 +30,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
-    namespace = "com.robertlevonyan.demo.camerax"
+    namespace = "com.example.photogalleryapp"
 }
 
 dependencies {
