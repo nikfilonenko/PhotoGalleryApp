@@ -42,8 +42,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.properties.Delegates
 import com.example.photogalleryapp.R
-import com.example.photogalleryapp.analyzer.LuminosityAnalyzer
-import com.example.photogalleryapp.enums.CameraTimer
 import com.example.photogalleryapp.utils.SwipeGestureDetector
 import com.example.photogalleryapp.utils.ThreadExecutor
 import com.example.photogalleryapp.utils.bottomMargin
@@ -270,23 +268,12 @@ class CameraFragment : BaseFragment<FragmentCameraBinding>(R.layout.fragment_cam
                 .setTargetRotation(rotation) // set the analyzer rotation
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // in our analysis, we care about the latest image
                 .build()
-                .also { setLuminosityAnalyzer(it) }
 
             // Unbind the use-cases before rebinding them
             localCameraProvider.unbindAll()
             // Bind all use cases to the camera with lifecycle
             bindToLifecycle(localCameraProvider, viewFinder)
         }, ContextCompat.getMainExecutor(requireContext()))
-    }
-
-
-    private fun setLuminosityAnalyzer(imageAnalysis: ImageAnalysis) {
-        // Use a worker thread for image analysis to prevent glitches
-        val analyzerThread = HandlerThread("LuminosityAnalysis").apply { start() }
-        imageAnalysis.setAnalyzer(
-            ThreadExecutor(Handler(analyzerThread.looper)),
-            LuminosityAnalyzer()
-        )
     }
 
     private fun bindToLifecycle(localCameraProvider: ProcessCameraProvider, viewFinder: PreviewView) {
