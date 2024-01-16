@@ -50,7 +50,6 @@ import kotlin.properties.Delegates
 
 
 @ExperimentalCamera2Interop
-@SuppressLint("RestrictedApi")
 class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video) {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
@@ -68,22 +67,6 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
     // Selector showing which camera is selected (front or back)
     private var lensFacing = CameraSelector.DEFAULT_BACK_CAMERA
 
-    // Selector showing which flash mode is selected (on, off or auto)
-    private var flashMode by Delegates.observable(ImageCapture.FLASH_MODE_OFF) { _, _, new ->
-        binding.btnFlash.setImageResource(
-            when (new) {
-                ImageCapture.FLASH_MODE_ON -> R.drawable.ic_flash_on
-                ImageCapture.FLASH_MODE_AUTO -> R.drawable.ic_flash_auto
-                else -> R.drawable.ic_flash_off
-            }
-        )
-    }
-
-    // Selector showing is grid enabled or not
-    private var hasGrid = false
-
-    // Selector showing is flash enabled or not
-    private var isTorchOn = false
 
     // Selector showing is recording currently active
     private var isRecording = false
@@ -107,7 +90,6 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
         override fun onDisplayAdded(displayId: Int) = Unit
         override fun onDisplayRemoved(displayId: Int) = Unit
 
-        @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
         override fun onDisplayChanged(displayId: Int) = view?.let { view ->
             if (displayId == this@VideoFragment.displayId) {
                 preview?.targetRotation = view.display.rotation
@@ -116,10 +98,8 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
         } ?: Unit
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        hasGrid = prefs.getBoolean(KEY_GRID, false)
         initViews()
 
         displayManager.registerDisplayListener(displayListener, null)
@@ -136,8 +116,6 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
             binding.btnRecordVideo.setOnClickListener { recordVideo() }
             btnGallery.setOnClickListener { openPreview() }
             btnSwitchCamera.setOnClickListener { toggleCamera() }
-            btnGrid.setOnClickListener { toggleGrid() }
-            btnFlash.setOnClickListener { toggleFlash() }
 
             // This swipe gesture adds a fun gesture to switch between video and photo
             val swipeGestures = SwipeGestureDetector().apply {
@@ -158,9 +136,6 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
      * Create some initial states
      * */
     private fun initViews() {
-        binding.btnGrid.setImageResource(if (hasGrid) R.drawable.ic_grid_on else R.drawable.ic_grid_off)
-        binding.groupGridLines.visibility = if (hasGrid) View.VISIBLE else View.GONE
-
         adjustInsets()
     }
 
@@ -175,9 +150,6 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
             } else {
                 view.endMargin = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).right
             }
-        }
-        binding.btnFlash.onWindowInsets { view, windowInsets ->
-            view.topMargin = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).top
         }
     }
 
@@ -284,79 +256,52 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
         view?.let { Navigation.findNavController(it).navigate(R.id.action_video_to_preview) }
     }
 
-    var recording: Recording? = null
+    private var recording: Recording? = null
+
 
     @SuppressLint("MissingPermission")
     private fun recordVideo() {
-        if (recording != null) {
+        if (isRecording) {
+            // Если запись уже активна, останавливаем ее
             animateRecord.cancel()
             recording?.stop()
-        }
-        val name = "CameraX-recording-${System.currentTimeMillis()}.mp4"
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Video.Media.DISPLAY_NAME, name)
-        }
-        val mediaStoreOutput = MediaStoreOutputOptions.Builder(
-            requireContext().contentResolver,
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        )
-            .setContentValues(contentValues)
-            .build()
-        recording = videoCapture?.output
-            ?.prepareRecording(requireContext(), mediaStoreOutput)
-            ?.withAudioEnabled()
-            ?.start(ContextCompat.getMainExecutor(requireContext())) { event ->
-                when (event) {
-                    is VideoRecordEvent.Start -> {
-                        animateRecord.start()
-                    }
-                    is VideoRecordEvent.Finalize -> {
-                        if (!event.hasError()) {
-                            val msg = "Video capture succeeded: " +
-                                    "${event.outputResults.outputUri}"
-                            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT)
-                                .show()
-                            Log.d(TAG, msg)
-                        } else {
-                            recording?.close()
-                            recording = null
-                            Log.e(
-                                TAG, "Video capture ends with error: " +
-                                    "${event.error}")
+            isRecording = false
+        } else {
+            // Если запись не активна, начинаем новую запись
+            val name = "CameraX-recording-${System.currentTimeMillis()}.mp4"
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Video.Media.DISPLAY_NAME, name)
+            }
+            val mediaStoreOutput = MediaStoreOutputOptions.Builder(
+                requireContext().contentResolver,
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            )
+                .setContentValues(contentValues)
+                .build()
+            recording = videoCapture?.output
+                ?.prepareRecording(requireContext(), mediaStoreOutput)
+                ?.withAudioEnabled()
+                ?.start(ContextCompat.getMainExecutor(requireContext())) { event ->
+                    when (event) {
+                        is VideoRecordEvent.Start -> {
+                            animateRecord.start()
+                        }
+                        is VideoRecordEvent.Finalize -> {
+                            if (!event.hasError()) {
+                                val msg = "Video capture succeeded: ${event.outputResults.outputUri}"
+                                Log.d(TAG, msg)
+                            } else {
+                                recording?.close()
+                                recording = null
+                                Log.e(TAG, "Video capture ends with error: ${event.error}")
+                            }
                         }
                     }
                 }
-            }
-        isRecording = !isRecording
+            isRecording = true
+        }
     }
 
-    /**
-     * Turns on or off the grid on the screen
-     * */
-    private fun toggleGrid() = binding.btnGrid.toggleButton(
-        flag = hasGrid,
-        rotationAngle = 180f,
-        firstIcon = R.drawable.ic_grid_off,
-        secondIcon = R.drawable.ic_grid_on
-    ) { flag ->
-        hasGrid = flag
-        prefs.putBoolean(KEY_GRID, flag)
-        binding.groupGridLines.visibility = if (flag) View.VISIBLE else View.GONE
-    }
-
-    /**
-     * Turns on or off the flashlight
-     * */
-    private fun toggleFlash() = binding.btnFlash.toggleButton(
-        flag = flashMode == ImageCapture.FLASH_MODE_ON,
-        rotationAngle = 360f,
-        firstIcon = R.drawable.ic_flash_off,
-        secondIcon = R.drawable.ic_flash_on
-    ) { flag ->
-        isTorchOn = flag
-        flashMode = if (flag) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
-        camera?.cameraControl?.enableTorch(flag)
-    }
 
     override fun onPermissionGranted() {
         // Each time apps is coming to foreground the need permission check is being processed
@@ -369,7 +314,7 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
                     // Do on IO Dispatcher
                     setLastPictureThumbnail()
                 }
-                camera?.cameraControl?.enableTorch(isTorchOn)
+                camera?.cameraControl
             }
         }
     }
@@ -408,7 +353,7 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
     }
 
     companion object {
-        private const val TAG = "CameraXDemo"
+        private const val TAG = "Camera App"
 
         const val KEY_GRID = "sPrefGridVideo"
 

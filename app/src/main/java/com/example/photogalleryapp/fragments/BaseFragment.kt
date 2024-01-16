@@ -23,7 +23,7 @@ import com.example.photogalleryapp.adapter.Media
 import com.google.android.material.snackbar.Snackbar
 import java.io.File
 
-/**Parent class of all the fragments in this project*/
+
 abstract class BaseFragment<B : ViewBinding>(private val fragmentLayout: Int) : Fragment() {
     /**
      *  Generic ViewBinding of the subclasses

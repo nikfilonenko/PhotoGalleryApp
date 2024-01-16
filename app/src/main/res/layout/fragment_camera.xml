@@ -67,93 +67,6 @@
         tools:ignore="ContentDescription" />
 
     <View
-        android:id="@+id/viewBg2"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:alpha="0.4"
-        android:background="@android:color/black"
-        android:elevation="1dp"
-        app:layout_constraintBottom_toBottomOf="@id/btnFlash"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/btnTimer"
-        android:layout_width="@dimen/button_size_small"
-        android:layout_height="@dimen/button_size_small"
-        android:background="@android:color/transparent"
-        android:elevation="1dp"
-        android:padding="@dimen/half_margin"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_timer_off"
-        app:layout_constraintEnd_toStartOf="@+id/btnGrid"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
-
-    <ImageButton
-        android:id="@+id/btnGrid"
-        android:layout_width="@dimen/button_size_small"
-        android:layout_height="@dimen/button_size_small"
-        android:background="@android:color/transparent"
-        android:elevation="1dp"
-        android:padding="@dimen/half_margin"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_grid_off"
-        app:layout_constraintEnd_toStartOf="@+id/btnFlash"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/btnTimer"
-        app:layout_constraintTop_toTopOf="@id/btnTimer"
-        tools:ignore="ContentDescription" />
-
-    <ImageButton
-        android:id="@+id/btnFlash"
-        android:layout_width="@dimen/button_size_small"
-        android:layout_height="@dimen/button_size_small"
-        android:background="@android:color/transparent"
-        android:elevation="1dp"
-        android:padding="@dimen/half_margin"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_flash_off"
-        app:layout_constraintEnd_toStartOf="@+id/btnHdr"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/btnGrid"
-        app:layout_constraintTop_toTopOf="@id/btnGrid"
-        tools:ignore="ContentDescription" />
-
-    <ImageButton
-        android:id="@+id/btnHdr"
-        android:layout_width="@dimen/button_size_small"
-        android:layout_height="@dimen/button_size_small"
-        android:background="@android:color/transparent"
-        android:elevation="1dp"
-        android:padding="@dimen/half_margin"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_hdr_off"
-        app:layout_constraintEnd_toStartOf="@id/btnExposure"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/btnFlash"
-        app:layout_constraintTop_toTopOf="@id/btnFlash"
-        tools:ignore="ContentDescription" />
-
-    <ImageButton
-        android:id="@+id/btnExposure"
-        android:layout_width="@dimen/button_size_small"
-        android:layout_height="@dimen/button_size_small"
-        android:background="@android:color/transparent"
-        android:elevation="1dp"
-        android:padding="@dimen/half_margin"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_exposure"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/btnHdr"
-        app:layout_constraintTop_toTopOf="@id/btnFlash"
-        tools:ignore="ContentDescription" />
-
-    <View
         android:id="@+id/gridVertical1"
         android:layout_width="1dp"
         android:layout_height="0dp"
@@ -326,17 +239,4 @@
             app:haloColor="@color/colorAccent"
             app:thumbColor="@color/colorAccent" />
     </FrameLayout>
-
-    <TextView
-        android:id="@+id/tvCountDown"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:elevation="4dp"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/count_down_text_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="0" />
 </androidx.constraintlayout.widget.ConstraintLayout>
