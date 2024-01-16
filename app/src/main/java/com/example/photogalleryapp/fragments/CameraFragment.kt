@@ -545,29 +545,31 @@ class CameraFragment : BaseFragment<FragmentCameraBinding>(R.layout.fragment_cam
             OutputFileOptions.Builder(file)
         }.setMetadata(metadata).build()
 
-        localImageCapture.takePicture(
-            outputOptions, // the options needed for the final image
-            requireContext().mainExecutor(), // the executor, on which the task will run
-            object : OnImageSavedCallback { // the callback, about the result of capture process
-                override fun onImageSaved(outputFileResults: OutputFileResults) {
-                    // This function is called if capture is successfully completed
-                    outputFileResults.savedUri
-                        ?.let { uri ->
-                            setGalleryThumbnail(uri)
-                            Log.d(TAG, "Photo saved in $uri")
-                        }
-                        ?: setLastPictureThumbnail()
-                }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            localImageCapture.takePicture(
+                outputOptions, // the options needed for the final image
+                requireContext().mainExecutor, // the executor, on which the task will run
+                object : OnImageSavedCallback { // the callback, about the result of capture process
+                    override fun onImageSaved(outputFileResults: OutputFileResults) {
+                        // This function is called if capture is successfully completed
+                        outputFileResults.savedUri
+                            ?.let { uri ->
+                                setGalleryThumbnail(uri)
+                                Log.d(TAG, "Photo saved in $uri")
+                            }
+                            ?: setLastPictureThumbnail()
+                    }
 
-                override fun onError(exception: ImageCaptureException) {
-                    // This function is called if there is an errors during capture process
-                    val msg = "Photo capture failed: ${exception.message}"
-                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-                    Log.e(TAG, msg)
-                    exception.printStackTrace()
+                    override fun onError(exception: ImageCaptureException) {
+                        // This function is called if there is an errors during capture process
+                        val msg = "Photo capture failed: ${exception.message}"
+                        Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                        Log.e(TAG, msg)
+                        exception.printStackTrace()
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     private fun setGalleryThumbnail(savedUri: Uri?) = binding.btnGallery.load(savedUri) {
@@ -606,8 +608,4 @@ class CameraFragment : BaseFragment<FragmentCameraBinding>(R.layout.fragment_cam
         private const val RATIO_4_3_VALUE = 4.0 / 3.0 // aspect ratio 4x3
         private const val RATIO_16_9_VALUE = 16.0 / 9.0 // aspect ratio 16x9
     }
-}
-
-private operator fun Executor.invoke(): Executor {
-    TODO("Not yet implemented")
 }
