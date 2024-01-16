@@ -84,33 +84,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/btnTimerOff"
-            android:layout_width="@dimen/button_size_small"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_timer_off"
-            tools:ignore="ContentDescription" />
-
-        <ImageButton
-            android:id="@+id/btnTimer3"
-            android:layout_width="@dimen/button_size_small"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_timer_3"
-            tools:ignore="ContentDescription" />
-
-        <ImageButton
-            android:id="@+id/btnTimer10"
-            android:layout_width="@dimen/button_size_small"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_timer_10"
-            tools:ignore="ContentDescription" />
     </LinearLayout>
 
     <LinearLayout
@@ -128,33 +101,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/btnFlashOff"
-            android:layout_width="@dimen/button_size_small"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_flash_off"
-            tools:ignore="ContentDescription" />
-
-        <ImageButton
-            android:id="@+id/btnFlashAuto"
-            android:layout_width="@dimen/button_size_small"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_flash_auto"
-            tools:ignore="ContentDescription" />
-
-        <ImageButton
-            android:id="@+id/btnFlashOn"
-            android:layout_width="@dimen/button_size_small"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_flash_on"
-            tools:ignore="ContentDescription" />
     </LinearLayout>
 
     <FrameLayout
