@@ -10,4 +10,6 @@
     <string name="cb_open_gallery">Navigate to Gallery</string>
     <string name="cb_switch">Switch between front and back cameras</string>
     <string name="cb_timer">Select a timer</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

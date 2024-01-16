@@ -33,17 +33,16 @@ abstract class BaseFragment<B : ViewBinding>(private val fragmentLayout: Int) : 
     // The Folder location where all the files will be stored
     protected val outputDirectory: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            "${Environment.DIRECTORY_DCIM}/CameraXDemo/"
+            "${Environment.DIRECTORY_DCIM}/CosmoFocus/"
         } else {
-            "${requireContext().getExternalFilesDir(Environment.DIRECTORY_DCIM)}/CameraXDemo/"
+            "${requireContext().getExternalFilesDir(Environment.DIRECTORY_DCIM)}/CosmoFocus/"
         }
     }
 
     // The permissions we need for the app to work properly
     private val permissions = mutableListOf(
         Manifest.permission.CAMERA,
-        Manifest.permission.RECORD_AUDIO,
-//        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.RECORD_AUDIO
     ).apply {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             add(Manifest.permission.ACCESS_MEDIA_LOCATION)

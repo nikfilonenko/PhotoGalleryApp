@@ -12,7 +12,6 @@ import com.example.photogalleryapp.utils.bottomMargin
 import com.example.photogalleryapp.utils.fitSystemWindows
 import com.example.photogalleryapp.utils.onPageSelected
 import com.example.photogalleryapp.utils.onWindowInsets
-import com.example.photogalleryapp.utils.share
 import com.example.photogalleryapp.utils.topMargin
 
 
@@ -50,7 +49,6 @@ class PreviewFragment : BaseFragment<FragmentPreviewBinding>(R.layout.fragment_p
         }
 
         binding.btnBack.setOnClickListener { onBackPressed() }
-        binding.btnShare.setOnClickListener { shareImage() }
         binding.btnDelete.setOnClickListener { deleteImage() }
     }
 
@@ -62,13 +60,6 @@ class PreviewFragment : BaseFragment<FragmentPreviewBinding>(R.layout.fragment_p
         binding.btnBack.onWindowInsets { view, windowInsets ->
             view.topMargin = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).top
         }
-        binding.btnShare.onWindowInsets { view, windowInsets ->
-            view.bottomMargin = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
-        }
-    }
-
-    private fun shareImage() {
-        mediaAdapter.shareImage(currentPage) { share(it) }
     }
 
     private fun deleteImage() {

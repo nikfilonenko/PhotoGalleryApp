@@ -21,12 +21,6 @@ class MediaAdapter(
         holder.bind(getItem(position))
     }
 
-    fun shareImage(currentPage: Int, action: (Media) -> Unit) {
-        if (currentPage < itemCount) {
-            action(getItem(currentPage))
-        }
-    }
-
     fun deleteImage(currentPage: Int) {
         if (currentPage < itemCount) {
             val media = getItem(currentPage)

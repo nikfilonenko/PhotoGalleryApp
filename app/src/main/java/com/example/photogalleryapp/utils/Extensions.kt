@@ -99,12 +99,6 @@ fun Window.fitSystemWindows() {
     WindowCompat.setDecorFitsSystemWindows(this, false)
 }
 
-fun Fragment.share(media: Media, title: String = "Share with...") {
-    val share = Intent(Intent.ACTION_SEND)
-    share.type = "image/*"
-    share.putExtra(Intent.EXTRA_STREAM, media.uri)
-    startActivity(Intent.createChooser(share, title))
-}
 
 fun ViewPager2.onPageSelected(action: (Int) -> Unit) {
     registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {

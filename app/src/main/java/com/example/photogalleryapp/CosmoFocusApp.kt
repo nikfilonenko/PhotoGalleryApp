@@ -5,7 +5,7 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.VideoFrameDecoder
 
-class CamXApp : Application(), ImageLoaderFactory {
+class CosmoFocusApp : Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
         .components {
             add(VideoFrameDecoder.Factory())

@@ -7,19 +7,14 @@ import android.hardware.display.DisplayManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.GestureDetector
 import android.view.View
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.*
-import androidx.camera.extensions.ExtensionMode
-import androidx.camera.extensions.ExtensionsManager
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -31,38 +26,27 @@ import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.example.photogalleryapp.databinding.FragmentCameraBinding
-import com.example.photogalleryapp.utils.SharedPrefsManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.util.concurrent.ExecutionException
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.properties.Delegates
 import com.example.photogalleryapp.R
 import com.example.photogalleryapp.utils.SwipeGestureDetector
-import com.example.photogalleryapp.utils.ThreadExecutor
 import com.example.photogalleryapp.utils.bottomMargin
-import com.example.photogalleryapp.utils.circularClose
-import com.example.photogalleryapp.utils.circularReveal
 import com.example.photogalleryapp.utils.endMargin
 import com.example.photogalleryapp.utils.fitSystemWindows
 import com.example.photogalleryapp.utils.onWindowInsets
 import com.example.photogalleryapp.utils.startPadding
 import com.example.photogalleryapp.utils.toggleButton
-import com.example.photogalleryapp.utils.topMargin
 import com.example.photogalleryapp.utils.topPadding
-import java.util.concurrent.Executor
 
 
-class CameraFragment : BaseFragment<FragmentCameraBinding>(R.layout.fragment_camera) {
+class PhotoCameraFragment : BaseFragment<FragmentCameraBinding>(R.layout.fragment_camera) {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
-
-    // An instance of a helper function to work with Shared Preferences
-    private val prefs by lazy { SharedPrefsManager.newInstance(requireContext()) }
 
     private var preview: Preview? = null
     private var cameraProvider: ProcessCameraProvider? = null
@@ -88,7 +72,7 @@ class CameraFragment : BaseFragment<FragmentCameraBinding>(R.layout.fragment_cam
         override fun onDisplayRemoved(displayId: Int) = Unit
 
         override fun onDisplayChanged(displayId: Int) = view?.let { view ->
-            if (displayId == this@CameraFragment.displayId) {
+            if (displayId == this@PhotoCameraFragment.displayId) {
                 preview?.targetRotation = view.display.rotation
                 imageCapture?.targetRotation = view.display.rotation
                 imageAnalyzer?.targetRotation = view.display.rotation

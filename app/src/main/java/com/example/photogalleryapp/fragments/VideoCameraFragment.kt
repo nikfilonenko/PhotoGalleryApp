@@ -15,7 +15,6 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.GestureDetector
 import android.view.View
-import android.widget.Toast
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.*
@@ -32,30 +31,25 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.example.photogalleryapp.R
 import com.example.photogalleryapp.databinding.FragmentVideoBinding
-import com.example.photogalleryapp.utils.SharedPrefsManager
 import com.example.photogalleryapp.utils.SwipeGestureDetector
 import com.example.photogalleryapp.utils.bottomMargin
 import com.example.photogalleryapp.utils.endMargin
 import com.example.photogalleryapp.utils.fitSystemWindows
 import com.example.photogalleryapp.utils.onWindowInsets
 import com.example.photogalleryapp.utils.toggleButton
-import com.example.photogalleryapp.utils.topMargin
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.properties.Delegates
 
 
 @ExperimentalCamera2Interop
-class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video) {
+class VideoCameraFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video) {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
 
-    // An instance of a helper function to work with Shared Preferences
-    private val prefs by lazy { SharedPrefsManager.newInstance(requireContext()) }
 
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
@@ -91,7 +85,7 @@ class VideoFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video
         override fun onDisplayRemoved(displayId: Int) = Unit
 
         override fun onDisplayChanged(displayId: Int) = view?.let { view ->
-            if (displayId == this@VideoFragment.displayId) {
+            if (displayId == this@VideoCameraFragment.displayId) {
                 preview?.targetRotation = view.display.rotation
                 videoCapture?.targetRotation = view.display.rotation
             }
