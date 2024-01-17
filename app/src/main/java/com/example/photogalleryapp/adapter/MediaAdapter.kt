@@ -4,7 +4,6 @@ import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.photogalleryapp.R
@@ -12,22 +11,35 @@ import com.example.photogalleryapp.utils.layoutInflater
 
 class MediaAdapter(
     private val onItemClick: (Boolean, Uri) -> Unit,
-    private val onDeleteClick: (Boolean, Uri) -> Unit,
-) : ListAdapter<Media, MediaAdapter.PicturesViewHolder>(MediaDiffCallback()) {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        PicturesViewHolder(parent.context.layoutInflater.inflate(R.layout.item_picture, parent, false))
+    private val onDeleteClick: (Boolean, Uri) -> Unit
+) : RecyclerView.Adapter<MediaAdapter.PicturesViewHolder>() {
+
+    private var mediaList: List<Media> = emptyList()
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PicturesViewHolder {
+        return PicturesViewHolder(parent.context.layoutInflater.inflate(R.layout.item_picture, parent, false))
+    }
 
     override fun onBindViewHolder(holder: PicturesViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(mediaList[position])
+    }
+
+    override fun getItemCount(): Int {
+        return mediaList.size
+    }
+
+    fun submitList(list: List<Media>) {
+        mediaList = list
+        notifyDataSetChanged()
     }
 
     fun deleteImage(currentPage: Int) {
         if (currentPage < itemCount) {
-            val media = getItem(currentPage)
-            val allMedia = currentList.toMutableList()
+            val media = mediaList[currentPage]
+            val allMedia = mediaList.toMutableList()
             allMedia.removeAt(currentPage)
             submitList(allMedia)
-            onDeleteClick(allMedia.size == 0, media.uri)
+            onDeleteClick(allMedia.isEmpty(), media.uri)
         }
     }
 
