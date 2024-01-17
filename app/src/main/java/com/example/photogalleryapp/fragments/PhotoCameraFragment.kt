@@ -135,24 +135,6 @@ class PhotoCameraFragment : BaseFragment<FragmentCameraBinding>(R.layout.fragmen
                 view.endMargin = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).right
             }
         }
-        binding.llTimerOptions.onWindowInsets { view, windowInsets ->
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                view.topPadding =
-                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).top
-            } else {
-                view.startPadding =
-                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).left
-            }
-        }
-        binding.llFlashOptions.onWindowInsets { view, windowInsets ->
-            if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                view.topPadding =
-                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).top
-            } else {
-                view.startPadding =
-                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).left
-            }
-        }
     }
 
     /**
@@ -396,11 +378,7 @@ class PhotoCameraFragment : BaseFragment<FragmentCameraBinding>(R.layout.fragmen
     }
 
     companion object {
-        private const val TAG = "CameraXDemo"
-
-        const val KEY_FLASH = "sPrefFlashCamera"
-        const val KEY_GRID = "sPrefGridCamera"
-        const val KEY_HDR = "sPrefHDR"
+        private const val TAG = "CosmoFocus"
 
         private const val RATIO_4_3_VALUE = 4.0 / 3.0 // aspect ratio 4x3
         private const val RATIO_16_9_VALUE = 16.0 / 9.0 // aspect ratio 16x9

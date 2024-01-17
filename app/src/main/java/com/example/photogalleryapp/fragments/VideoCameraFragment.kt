@@ -347,9 +347,7 @@ class VideoCameraFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment
     }
 
     companion object {
-        private const val TAG = "Camera App"
-
-        const val KEY_GRID = "sPrefGridVideo"
+        private const val TAG = "CosmoFocus"
 
         private const val RATIO_4_3_VALUE = 4.0 / 3.0 // aspect ratio 4x3
         private const val RATIO_16_9_VALUE = 16.0 / 9.0 // aspect ratio 16x9

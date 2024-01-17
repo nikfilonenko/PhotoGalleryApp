@@ -109,12 +109,6 @@ fun ViewPager2.onPageSelected(action: (Int) -> Unit) {
     })
 }
 
-fun Context.mainExecutor(): Executor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-    mainExecutor
-} else {
-    MainExecutor()
-}
-
 val Context.layoutInflater: LayoutInflater
     get() = LayoutInflater.from(this)
 
