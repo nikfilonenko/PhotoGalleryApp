@@ -46,7 +46,7 @@ import kotlin.math.min
 
 
 @ExperimentalCamera2Interop
-class VideoCameraFragment : BaseFragment<FragmentVideoBinding>(R.layout.fragment_video) {
+class VideoCameraFragment : BaseFragment(R.layout.fragment_video) {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
 

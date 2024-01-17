@@ -14,7 +14,7 @@ import com.example.photogalleryapp.utils.onWindowInsets
 import com.example.photogalleryapp.utils.topMargin
 
 
-class GalleryFragment : BaseFragment<FragmentPreviewBinding>(R.layout.fragment_preview) {
+class GalleryFragment : BaseFragment(R.layout.fragment_preview) {
     private val mediaAdapter = MediaAdapter(
         onItemClick = { isVideo, uri ->
             if (!isVideo) {

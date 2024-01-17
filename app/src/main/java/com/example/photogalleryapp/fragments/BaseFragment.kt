@@ -24,11 +24,11 @@ import com.google.android.material.snackbar.Snackbar
 import java.io.File
 
 
-abstract class BaseFragment<B : ViewBinding>(private val fragmentLayout: Int) : Fragment() {
+abstract class BaseFragment(private val fragmentLayout: Int) : Fragment() {
     /**
      *  Generic ViewBinding of the subclasses
      * */
-    abstract val binding: B
+    abstract val binding: ViewBinding
 
     // The Folder location where all the files will be stored
     protected val outputDirectory: String by lazy {
