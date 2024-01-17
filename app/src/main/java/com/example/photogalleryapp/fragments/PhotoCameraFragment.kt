@@ -44,7 +44,7 @@ import com.example.photogalleryapp.utils.toggleButton
 import com.example.photogalleryapp.utils.topPadding
 
 
-class PhotoCameraFragment : BaseFragment(R.layout.fragment_camera) {
+class PhotoCameraFragment : BaseFragment() {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
 

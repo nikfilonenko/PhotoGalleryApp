@@ -24,7 +24,7 @@ import com.google.android.material.snackbar.Snackbar
 import java.io.File
 
 
-abstract class BaseFragment(private val fragmentLayout: Int) : Fragment() {
+abstract class BaseFragment : Fragment() {
     /**
      *  Generic ViewBinding of the subclasses
      * */
