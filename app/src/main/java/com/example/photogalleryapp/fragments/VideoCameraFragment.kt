@@ -44,7 +44,6 @@ import kotlinx.coroutines.launch
 
 @ExperimentalCamera2Interop
 class VideoCameraFragment : StoreBaseFragment() {
-    // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
 
 
@@ -55,11 +54,9 @@ class VideoCameraFragment : StoreBaseFragment() {
 
     private var displayId = -1
 
-    // Selector showing which camera is selected (front or back)
     private var lensFacing = CameraSelector.DEFAULT_BACK_CAMERA
 
 
-    // Selector showing is recording currently active
     private var isRecording = false
     private val animateRecord by lazy {
         ObjectAnimator.ofFloat(binding.btnRecordVideo, View.ALPHA, 1f, 0.5f).apply {
@@ -89,6 +86,7 @@ class VideoCameraFragment : StoreBaseFragment() {
         } ?: Unit
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
@@ -108,17 +106,14 @@ class VideoCameraFragment : StoreBaseFragment() {
             btnGallery.setOnClickListener { openPreview() }
             btnSwitchCamera.setOnClickListener { toggleCamera() }
 
-            // This swipe gesture adds a fun gesture to switch between video and photo
             val swipeGestures = SwipeGestureDetector().apply {
                 setSwipeCallback(left = {
                     Navigation.findNavController(view).navigate(R.id.action_video_to_camera)
                 })
             }
-
             val gestureDetectorCompat = GestureDetector(requireContext(), swipeGestures)
             viewFinder.setOnTouchListener { _, motionEvent ->
-                if (gestureDetectorCompat.onTouchEvent(motionEvent)) return@setOnTouchListener false
-                return@setOnTouchListener true
+                !gestureDetectorCompat.onTouchEvent(motionEvent)
             }
         }
     }

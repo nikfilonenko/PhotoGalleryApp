@@ -1,5 +1,6 @@
 package com.example.photogalleryapp.fragments
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.content.res.Configuration
@@ -66,6 +67,7 @@ class PhotoCameraFragment : StoreBaseFragment() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
@@ -87,7 +89,6 @@ class PhotoCameraFragment : StoreBaseFragment() {
             btnSwitchCamera.setOnClickListener { toggleCamera() }
             flExposure.setOnClickListener { flExposure.visibility = View.GONE }
 
-            // This swipe gesture adds a fun gesture to switch between video and photo
             val swipeGestures = SwipeGestureDetector().apply {
                 setSwipeCallback(right = {
                     Navigation.findNavController(view).navigate(R.id.action_camera_to_video)
@@ -97,7 +98,6 @@ class PhotoCameraFragment : StoreBaseFragment() {
             viewFinder.setOnTouchListener { _, motionEvent ->
                 !gestureDetectorCompat.onTouchEvent(motionEvent)
             }
-
         }
     }
 
@@ -105,22 +105,18 @@ class PhotoCameraFragment : StoreBaseFragment() {
         adjustInsets()
     }
 
-    /**
-     * This methods adds all necessary margins to some views based on window insets and screen orientation
-     * */
     private fun adjustInsets() {
         activity?.window?.fitSystemWindows()
         binding.btnTakePicture.onWindowInsets { view, windowInsets ->
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                view.bottomMargin =
-                    windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+                view.bottomMargin = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
             } else {
                 view.endMargin = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).right
             }
         }
     }
 
-    fun toggleCamera() = binding.btnSwitchCamera.toggleButton(
+    private fun toggleCamera() = binding.btnSwitchCamera.toggleButton(
         flag = lensFacing == CameraSelector.DEFAULT_BACK_CAMERA,
         rotationAngle = 180f,
         firstIcon = R.drawable.ic_outline_camera_rear,
@@ -164,9 +160,6 @@ class PhotoCameraFragment : StoreBaseFragment() {
     }
 
 
-    /**
-     * Unbinds all the lifecycles from CameraX, then creates new with new parameters
-     * */
     private fun startCamera() {
         // This is the CameraX PreviewView where the camera will be rendered
         val viewFinder = binding.viewFinder
