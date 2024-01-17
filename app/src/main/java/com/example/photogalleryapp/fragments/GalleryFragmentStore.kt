@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.Navigation
-import com.example.photogalleryapp.R
 import com.example.photogalleryapp.adapter.MediaAdapter
 import com.example.photogalleryapp.databinding.FragmentPreviewBinding
 import com.example.photogalleryapp.utils.fitSystemWindows
@@ -14,7 +13,7 @@ import com.example.photogalleryapp.utils.onWindowInsets
 import com.example.photogalleryapp.utils.topMargin
 
 
-class GalleryFragment : BaseFragment() {
+class GalleryFragmentStore : StoreBaseFragment() {
     private val mediaAdapter = MediaAdapter(
         onItemClick = { isVideo, uri ->
             if (!isVideo) {

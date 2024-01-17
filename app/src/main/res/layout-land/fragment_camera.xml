@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:background="@android:color/black"
-    tools:context="com.example.photogalleryapp.fragments.PhotoCameraFragment">
+    tools:context="com.example.photogalleryapp.fragments.PhotoCameraFragmentStore">
 
     <androidx.camera.view.PreviewView
         android:id="@+id/viewFinder"

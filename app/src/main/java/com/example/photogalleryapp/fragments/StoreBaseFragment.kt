@@ -20,7 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 
 
 
-abstract class BaseFragment : Fragment() {
+abstract class StoreBaseFragment : Fragment() {
 
     abstract val binding: ViewBinding
     protected val outputDirectory: String = "${Environment.DIRECTORY_DCIM}/CosmoFocus/"

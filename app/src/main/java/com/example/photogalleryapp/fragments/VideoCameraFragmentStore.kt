@@ -46,7 +46,7 @@ import kotlin.math.min
 
 
 @ExperimentalCamera2Interop
-class VideoCameraFragment : BaseFragment() {
+class VideoCameraFragmentStore : StoreBaseFragment() {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
 
@@ -85,7 +85,7 @@ class VideoCameraFragment : BaseFragment() {
         override fun onDisplayRemoved(displayId: Int) = Unit
 
         override fun onDisplayChanged(displayId: Int) = view?.let { view ->
-            if (displayId == this@VideoCameraFragment.displayId) {
+            if (displayId == this@VideoCameraFragmentStore.displayId) {
                 preview?.targetRotation = view.display.rotation
                 videoCapture?.targetRotation = view.display.rotation
             }
@@ -179,8 +179,6 @@ class VideoCameraFragment : BaseFragment() {
 
             // The display information
             val metrics = DisplayMetrics().also { viewFinder.display.getRealMetrics(it) }
-            // The ratio for the output image and preview
-            val aspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
             // The display rotation
             val rotation = viewFinder.display.rotation
 
@@ -189,7 +187,6 @@ class VideoCameraFragment : BaseFragment() {
 
             // The Configuration of camera preview
             preview = Preview.Builder()
-                .setTargetAspectRatio(aspectRatio) // set the camera aspect ratio
                 .setTargetRotation(rotation) // set the camera rotation
                 .build()
 
@@ -228,24 +225,6 @@ class VideoCameraFragment : BaseFragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    /**
-     *  Detecting the most suitable aspect ratio for current dimensions
-     *
-     *  @param width - preview width
-     *  @param height - preview height
-     *  @return suitable aspect ratio
-     */
-    private fun aspectRatio(width: Int, height: Int): Int {
-        val previewRatio = max(width, height).toDouble() / min(width, height)
-        if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
-            return AspectRatio.RATIO_4_3
-        }
-        return AspectRatio.RATIO_16_9
-    }
-
-    /**
-     * Navigate to PreviewFragment
-     * */
     private fun openPreview() {
         view?.let { Navigation.findNavController(it).navigate(R.id.action_video_to_preview) }
     }
@@ -339,8 +318,6 @@ class VideoCameraFragment : BaseFragment() {
         }
     }
 
-    private fun onBackPressed() = requireActivity().finish()
-
     override fun onStop() {
         super.onStop()
         camera?.cameraControl?.enableTorch(false)
@@ -348,8 +325,5 @@ class VideoCameraFragment : BaseFragment() {
 
     companion object {
         private const val TAG = "CosmoFocus"
-
-        private const val RATIO_4_3_VALUE = 4.0 / 3.0 // aspect ratio 4x3
-        private const val RATIO_16_9_VALUE = 16.0 / 9.0 // aspect ratio 16x9
     }
 }

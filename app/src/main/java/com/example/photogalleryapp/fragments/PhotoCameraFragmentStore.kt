@@ -39,12 +39,10 @@ import com.example.photogalleryapp.utils.bottomMargin
 import com.example.photogalleryapp.utils.endMargin
 import com.example.photogalleryapp.utils.fitSystemWindows
 import com.example.photogalleryapp.utils.onWindowInsets
-import com.example.photogalleryapp.utils.startPadding
 import com.example.photogalleryapp.utils.toggleButton
-import com.example.photogalleryapp.utils.topPadding
 
 
-class PhotoCameraFragment : BaseFragment() {
+class PhotoCameraFragmentStore : StoreBaseFragment() {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
 
@@ -72,7 +70,7 @@ class PhotoCameraFragment : BaseFragment() {
         override fun onDisplayRemoved(displayId: Int) = Unit
 
         override fun onDisplayChanged(displayId: Int) = view?.let { view ->
-            if (displayId == this@PhotoCameraFragment.displayId) {
+            if (displayId == this@PhotoCameraFragmentStore.displayId) {
                 preview?.targetRotation = view.display.rotation
                 imageCapture?.targetRotation = view.display.rotation
                 imageAnalyzer?.targetRotation = view.display.rotation
@@ -137,10 +135,6 @@ class PhotoCameraFragment : BaseFragment() {
         }
     }
 
-    /**
-     * Change the facing of camera
-     *  toggleButton() function is an Extension function made to animate button rotation
-     * */
     fun toggleCamera() = binding.btnSwitchCamera.toggleButton(
         flag = lensFacing == CameraSelector.DEFAULT_BACK_CAMERA,
         rotationAngle = 180f,
@@ -156,9 +150,6 @@ class PhotoCameraFragment : BaseFragment() {
         startCamera()
     }
 
-    /**
-     * Navigate to PreviewFragment
-     * */
     private fun openPreview() {
         if (getMedia().isEmpty()) return
         view?.let { Navigation.findNavController(it).navigate(R.id.action_camera_to_preview) }
@@ -197,19 +188,12 @@ class PhotoCameraFragment : BaseFragment() {
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()
-            } catch (e: InterruptedException) {
-                Toast.makeText(requireContext(), "Error starting camera", Toast.LENGTH_SHORT).show()
-                return@addListener
-            } catch (e: ExecutionException) {
+            }
+            catch (e: ExecutionException) {
                 Toast.makeText(requireContext(), "Error starting camera", Toast.LENGTH_SHORT).show()
                 return@addListener
             }
 
-            // The display information
-            val metrics = DisplayMetrics().also { viewFinder.display.getRealMetrics(it) }
-            // The ratio for the output image and preview
-            val aspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
-            // The display rotation
             val rotation = viewFinder.display.rotation
 
             val localCameraProvider = cameraProvider
@@ -217,20 +201,17 @@ class PhotoCameraFragment : BaseFragment() {
 
             // The Configuration of camera preview
             preview = Preview.Builder()
-                .setTargetAspectRatio(aspectRatio) // set the camera aspect ratio
                 .setTargetRotation(rotation) // set the camera rotation
                 .build()
 
             // The Configuration of image capture
             imageCapture = Builder()
                 .setCaptureMode(CAPTURE_MODE_MAXIMIZE_QUALITY) // setting to have pictures with highest quality possible (may be slow)
-                .setTargetAspectRatio(aspectRatio) // set the capture aspect ratio
                 .setTargetRotation(rotation) // set the capture rotation
                 .build()
 
             // The Configuration of image analyzing
             imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetAspectRatio(aspectRatio) // set the analyzer aspect ratio
                 .setTargetRotation(rotation) // set the analyzer rotation
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // in our analysis, we care about the latest image
                 .build()
@@ -250,47 +231,13 @@ class PhotoCameraFragment : BaseFragment() {
                 preview, // camera preview use case
                 imageCapture, // image capture use case
                 imageAnalyzer, // image analyzer use case
-            ).run {
-                // Init camera exposure control
-                cameraInfo.exposureState.run {
-                    val lower = exposureCompensationRange.lower
-                    val upper = exposureCompensationRange.upper
+            )
 
-                    binding.sliderExposure.run {
-                        valueFrom = lower.toFloat()
-                        valueTo = upper.toFloat()
-                        stepSize = 1f
-                        value = exposureCompensationIndex.toFloat()
-
-                        addOnChangeListener { _, value, _ ->
-                            cameraControl.setExposureCompensationIndex(value.toInt())
-                        }
-                    }
-                }
-            }
-
-            // Attach the viewfinder's surface provider to preview use case
             preview?.setSurfaceProvider(viewFinder.surfaceProvider)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to bind use cases", e)
         }
     }
-
-    /**
-     *  Detecting the most suitable aspect ratio for current dimensions
-     *
-     *  @param width - preview width
-     *  @param height - preview height
-     *  @return suitable aspect ratio
-     */
-    private fun aspectRatio(width: Int, height: Int): Int {
-        val previewRatio = max(width, height).toDouble() / min(width, height)
-        if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
-            return AspectRatio.RATIO_4_3
-        }
-        return AspectRatio.RATIO_16_9
-    }
-
 
     private fun takePicture() = lifecycleScope.launch(Dispatchers.Main) {
         captureImage()
@@ -299,12 +246,6 @@ class PhotoCameraFragment : BaseFragment() {
     private fun captureImage() {
         val localImageCapture = imageCapture ?: throw IllegalStateException("Camera initialization failed.")
 
-        // Setup image capture metadata
-        val metadata = Metadata().apply {
-            // Mirror image when using the front camera
-            isReversedHorizontal = lensFacing == CameraSelector.DEFAULT_FRONT_CAMERA
-        }
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         // Options fot the output image file
         val outputOptions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val contentValues = ContentValues().apply {
@@ -324,7 +265,7 @@ class PhotoCameraFragment : BaseFragment() {
             val file = File(outputDirectory, "${System.currentTimeMillis()}.jpg")
 
             OutputFileOptions.Builder(file)
-        }.setMetadata(metadata).build()
+        }.build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             localImageCapture.takePicture(
@@ -373,12 +314,8 @@ class PhotoCameraFragment : BaseFragment() {
         displayManager.unregisterDisplayListener(displayListener)
     }
 
-    private fun onBackPressed() = requireActivity().finish()
 
     companion object {
         private const val TAG = "CosmoFocus"
-
-        private const val RATIO_4_3_VALUE = 4.0 / 3.0 // aspect ratio 4x3
-        private const val RATIO_16_9_VALUE = 16.0 / 9.0 // aspect ratio 16x9
     }
 }
