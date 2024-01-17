@@ -65,8 +65,7 @@ class GalleryFragment : BaseFragment() {
         mediaAdapter.deleteImage(currentPage)
     }
 
-    override fun onBackPressed() {
+    private fun onBackPressed() {
         view?.let { Navigation.findNavController(it).popBackStack() }
     }
-
 }

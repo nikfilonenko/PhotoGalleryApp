@@ -11,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.viewbinding.ViewBinding
@@ -60,10 +59,10 @@ abstract class BaseFragment : Fragment() {
         }
     }
 
-    protected fun getMedia(): List<Media> = getMediaQPlus()
+    protected fun getMedia(): List<Media> = getMediaStore()
 
 
-    private fun getMediaQPlus(): List<Media> {
+    private fun getMediaStore(): List<Media> {
         val videoProjection = arrayOf(
             MediaStore.Video.Media._ID,
             MediaStore.Video.Media.RELATIVE_PATH,
@@ -112,6 +111,4 @@ abstract class BaseFragment : Fragment() {
     }
 
     open fun onPermissionGranted() = Unit
-
-    abstract fun onBackPressed()
 }

@@ -373,9 +373,7 @@ class PhotoCameraFragment : BaseFragment() {
         displayManager.unregisterDisplayListener(displayListener)
     }
 
-    override fun onBackPressed() = when {
-        else -> requireActivity().finish()
-    }
+    private fun onBackPressed() = requireActivity().finish()
 
     companion object {
         private const val TAG = "CosmoFocus"

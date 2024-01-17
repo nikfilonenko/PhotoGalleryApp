@@ -339,7 +339,7 @@ class VideoCameraFragment : BaseFragment() {
         }
     }
 
-    override fun onBackPressed() = requireActivity().finish()
+    private fun onBackPressed() = requireActivity().finish()
 
     override fun onStop() {
         super.onStop()
