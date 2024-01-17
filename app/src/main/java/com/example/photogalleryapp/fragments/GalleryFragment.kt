@@ -13,7 +13,7 @@ import com.example.photogalleryapp.utils.onWindowInsets
 import com.example.photogalleryapp.utils.topMargin
 
 
-class GalleryFragmentStore : StoreBaseFragment() {
+class GalleryFragment : StoreBaseFragment() {
     private val mediaAdapter = MediaAdapter(
         onItemClick = { isVideo, uri ->
             if (!isVideo) {

@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.GestureDetector
 import android.view.View
@@ -22,17 +21,11 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import coil.load
-import coil.request.ErrorResult
-import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.example.photogalleryapp.databinding.FragmentCameraBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.concurrent.ExecutionException
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 import com.example.photogalleryapp.R
 import com.example.photogalleryapp.utils.SwipeGestureDetector
 import com.example.photogalleryapp.utils.bottomMargin
@@ -42,7 +35,7 @@ import com.example.photogalleryapp.utils.onWindowInsets
 import com.example.photogalleryapp.utils.toggleButton
 
 
-class PhotoCameraFragmentStore : StoreBaseFragment() {
+class PhotoCameraFragment : StoreBaseFragment() {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
 
@@ -64,7 +57,7 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
 
         override fun onDisplayChanged(displayId: Int) {
             view?.let { view ->
-                if (displayId == this@PhotoCameraFragmentStore.displayId) {
+                if (displayId == this@PhotoCameraFragment.displayId) {
                     preview?.targetRotation = view.display.rotation
                     imageCapture?.targetRotation = view.display.rotation
                     imageAnalyzer?.targetRotation = view.display.rotation
@@ -107,7 +100,6 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
 
         }
     }
-
 
     private fun initViews() {
         adjustInsets()
@@ -212,19 +204,15 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
     }
 
     private fun bindToLifecycle(localCameraProvider: ProcessCameraProvider, viewFinder: PreviewView) {
-        try {
-            localCameraProvider.bindToLifecycle(
-                viewLifecycleOwner, // current lifecycle owner
-                hdrCameraSelector ?: lensFacing, // either front or back facing
-                preview, // camera preview use case
-                imageCapture, // image capture use case
-                imageAnalyzer, // image analyzer use case
-            )
+        localCameraProvider.bindToLifecycle(
+            viewLifecycleOwner, // current lifecycle owner
+            hdrCameraSelector ?: lensFacing, // either front or back facing
+            preview, // camera preview use case
+            imageCapture, // image capture use case
+            imageAnalyzer, // image analyzer use case
+        )
 
-            preview?.setSurfaceProvider(viewFinder.surfaceProvider)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to bind use cases", e)
-        }
+        preview?.setSurfaceProvider(viewFinder.surfaceProvider)
     }
 
     private fun takePicture() = lifecycleScope.launch(Dispatchers.Main) {
@@ -260,21 +248,18 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
                     override fun onImageSaved(outputFileResults: OutputFileResults) {
                         outputFileResults.savedUri?.let { uri ->
                             setGalleryThumbnail(uri)
-                            Log.d(TAG, "Photo saved in $uri")
                         } ?: setLastPictureThumbnail()
                     }
 
                     override fun onError(exception: ImageCaptureException) {
                         val msg = "Photo capture failed: ${exception.message}"
                         Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-                        Log.e(TAG, msg)
                         exception.printStackTrace()
                     }
                 }
             )
         }
     }
-
 
     private fun setGalleryThumbnail(savedUri: Uri?) {
         binding.btnGallery.load(savedUri) {
@@ -283,14 +268,8 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
         }
     }
 
-
     override fun onDestroyView() {
         super.onDestroyView()
         displayManager.unregisterDisplayListener(displayListener)
-    }
-
-
-    companion object {
-        private const val TAG = "CosmoFocus"
     }
 }

@@ -40,13 +40,10 @@ import com.example.photogalleryapp.utils.toggleButton
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 
 
 @ExperimentalCamera2Interop
-class VideoCameraFragmentStore : StoreBaseFragment() {
+class VideoCameraFragment : StoreBaseFragment() {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
 
@@ -85,7 +82,7 @@ class VideoCameraFragmentStore : StoreBaseFragment() {
         override fun onDisplayRemoved(displayId: Int) = Unit
 
         override fun onDisplayChanged(displayId: Int) = view?.let { view ->
-            if (displayId == this@VideoCameraFragmentStore.displayId) {
+            if (displayId == this@VideoCameraFragment.displayId) {
                 preview?.targetRotation = view.display.rotation
                 videoCapture?.targetRotation = view.display.rotation
             }
