@@ -28,14 +28,11 @@ abstract class BaseFragment : Fragment() {
     private val permissions = mutableListOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
 
     private val permissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        if (permissions.all { it.value }) {
-            onPermissionGranted()
-        } else {
-            view?.let { v ->
-                Snackbar.make(v, R.string.message_no_permissions, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(R.string.label_ok) { ActivityCompat.finishAffinity(requireActivity()) }
-                    .show()
-            }
+        if (permissions.all { it.value }) onPermissionGranted()
+        else view?.let {
+            Snackbar.make(it, R.string.message_no_permissions, Snackbar.LENGTH_INDEFINITE).setAction(R.string.label_ok) {
+                requireActivity().finishAffinity()
+            }.show()
         }
     }
 
