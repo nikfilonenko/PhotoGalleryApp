@@ -51,31 +51,26 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
 
-    // A lazy instance of the current fragment's view binding
     override val binding: FragmentCameraBinding by lazy { FragmentCameraBinding.inflate(layoutInflater) }
 
     private var displayId = -1
 
-    // Selector showing which camera is selected (front or back)
     private var lensFacing = CameraSelector.DEFAULT_BACK_CAMERA
     private var hdrCameraSelector: CameraSelector? = null
 
-    /**
-     * A display listener for orientation changes that do not trigger a configuration
-     * change, for example if we choose to override config change in manifest or for 180-degree
-     * orientation changes.
-     */
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) = Unit
         override fun onDisplayRemoved(displayId: Int) = Unit
 
-        override fun onDisplayChanged(displayId: Int) = view?.let { view ->
-            if (displayId == this@PhotoCameraFragmentStore.displayId) {
-                preview?.targetRotation = view.display.rotation
-                imageCapture?.targetRotation = view.display.rotation
-                imageAnalyzer?.targetRotation = view.display.rotation
+        override fun onDisplayChanged(displayId: Int) {
+            view?.let { view ->
+                if (displayId == this@PhotoCameraFragmentStore.displayId) {
+                    preview?.targetRotation = view.display.rotation
+                    imageCapture?.targetRotation = view.display.rotation
+                    imageAnalyzer?.targetRotation = view.display.rotation
+                }
             }
-        } ?: Unit
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -107,15 +102,13 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
             }
             val gestureDetectorCompat = GestureDetector(requireContext(), swipeGestures)
             viewFinder.setOnTouchListener { _, motionEvent ->
-                if (gestureDetectorCompat.onTouchEvent(motionEvent)) return@setOnTouchListener false
-                return@setOnTouchListener true
+                !gestureDetectorCompat.onTouchEvent(motionEvent)
             }
+
         }
     }
 
-    /**
-     * Create some initial states
-     * */
+
     private fun initViews() {
         adjustInsets()
     }
@@ -157,25 +150,27 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
 
 
     override fun onPermissionGranted() {
-        // Each time apps is coming to foreground the need permission check is being processed
-        binding.viewFinder.let { vf ->
-            vf.post {
-                // Setting current display ID
-                displayId = vf.display.displayId
-                startCamera()
-                lifecycleScope.launch(Dispatchers.IO) {
-                    // Do on IO Dispatcher
-                    setLastPictureThumbnail()
-                }
+        binding.viewFinder.post {
+            displayId = binding.viewFinder.display.displayId
+            startCamera()
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                setLastPictureThumbnail()
             }
         }
     }
 
-    private fun setLastPictureThumbnail() = binding.btnGallery.post {
-        getMedia().firstOrNull() // check if there are any photos or videos in the app directory
-            ?.let { setGalleryThumbnail(it.uri) } // preview the last one
-            ?: binding.btnGallery.setImageResource(R.drawable.ic_no_picture) // or the default placeholder
+
+    private fun setLastPictureThumbnail() {
+        val lastMedia = getMedia().firstOrNull()
+
+        if (lastMedia != null) {
+            setGalleryThumbnail(lastMedia.uri)
+        } else {
+            binding.btnGallery.setImageResource(R.drawable.ic_no_picture)
+        }
     }
+
 
     /**
      * Unbinds all the lifecycles from CameraX, then creates new with new parameters
@@ -186,20 +181,13 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
-            try {
-                cameraProvider = cameraProviderFuture.get()
-            }
-            catch (e: ExecutionException) {
-                Toast.makeText(requireContext(), "Error starting camera", Toast.LENGTH_SHORT).show()
-                return@addListener
-            }
+            cameraProvider = cameraProviderFuture.get()
 
             val rotation = viewFinder.display.rotation
 
             val localCameraProvider = cameraProvider
                 ?: throw IllegalStateException("Camera initialization failed.")
 
-            // The Configuration of camera preview
             preview = Preview.Builder()
                 .setTargetRotation(rotation) // set the camera rotation
                 .build()
@@ -246,7 +234,7 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
     private fun captureImage() {
         val localImageCapture = imageCapture ?: throw IllegalStateException("Camera initialization failed.")
 
-        // Options fot the output image file
+        // Options for the output image file
         val outputOptions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, System.currentTimeMillis())
@@ -254,36 +242,29 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
                 put(MediaStore.MediaColumns.RELATIVE_PATH, outputDirectory)
             }
 
-            val contentResolver = requireContext().contentResolver
-
-            // Create the output uri
-            val contentUri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-
-            OutputFileOptions.Builder(contentResolver, contentUri, contentValues)
+            OutputFileOptions.Builder(
+                requireContext().contentResolver,
+                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+                contentValues
+            )
         } else {
-            File(outputDirectory).mkdirs()
             val file = File(outputDirectory, "${System.currentTimeMillis()}.jpg")
-
             OutputFileOptions.Builder(file)
         }.build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             localImageCapture.takePicture(
-                outputOptions, // the options needed for the final image
-                requireContext().mainExecutor, // the executor, on which the task will run
-                object : OnImageSavedCallback { // the callback, about the result of capture process
+                outputOptions,
+                requireContext().mainExecutor,
+                object : OnImageSavedCallback {
                     override fun onImageSaved(outputFileResults: OutputFileResults) {
-                        // This function is called if capture is successfully completed
-                        outputFileResults.savedUri
-                            ?.let { uri ->
-                                setGalleryThumbnail(uri)
-                                Log.d(TAG, "Photo saved in $uri")
-                            }
-                            ?: setLastPictureThumbnail()
+                        outputFileResults.savedUri?.let { uri ->
+                            setGalleryThumbnail(uri)
+                            Log.d(TAG, "Photo saved in $uri")
+                        } ?: setLastPictureThumbnail()
                     }
 
                     override fun onError(exception: ImageCaptureException) {
-                        // This function is called if there is an errors during capture process
                         val msg = "Photo capture failed: ${exception.message}"
                         Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
                         Log.e(TAG, msg)
@@ -294,20 +275,14 @@ class PhotoCameraFragmentStore : StoreBaseFragment() {
         }
     }
 
-    private fun setGalleryThumbnail(savedUri: Uri?) = binding.btnGallery.load(savedUri) {
-        placeholder(R.drawable.ic_no_picture)
-        transformations(CircleCropTransformation())
-        listener(object : ImageRequest.Listener {
-            override fun onError(request: ImageRequest, result: ErrorResult) {
-                super.onError(request, result)
-                binding.btnGallery.load(savedUri) {
-                    placeholder(R.drawable.ic_no_picture)
-                    transformations(CircleCropTransformation())
-//                    fetcher(VideoFrameUriFetcher(requireContext()))
-                }
-            }
-        })
+
+    private fun setGalleryThumbnail(savedUri: Uri?) {
+        binding.btnGallery.load(savedUri) {
+            placeholder(R.drawable.ic_no_picture)
+            transformations(CircleCropTransformation())
+        }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
