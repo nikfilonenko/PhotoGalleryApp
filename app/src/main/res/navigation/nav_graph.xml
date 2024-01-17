@@ -31,7 +31,7 @@
     </fragment>
     <fragment
         android:id="@+id/previewFragment"
-        android:name="com.example.photogalleryapp.fragments.PreviewFragment"
+        android:name="com.example.photogalleryapp.fragments.GalleryFragment"
         android:label="fragment_preview"
         tools:layout="@layout/fragment_preview" />
     <fragment

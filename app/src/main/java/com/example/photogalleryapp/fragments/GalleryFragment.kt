@@ -8,14 +8,13 @@ import androidx.navigation.Navigation
 import com.example.photogalleryapp.R
 import com.example.photogalleryapp.adapter.MediaAdapter
 import com.example.photogalleryapp.databinding.FragmentPreviewBinding
-import com.example.photogalleryapp.utils.bottomMargin
 import com.example.photogalleryapp.utils.fitSystemWindows
 import com.example.photogalleryapp.utils.onPageSelected
 import com.example.photogalleryapp.utils.onWindowInsets
 import com.example.photogalleryapp.utils.topMargin
 
 
-class PreviewFragment : BaseFragment<FragmentPreviewBinding>(R.layout.fragment_preview) {
+class GalleryFragment : BaseFragment<FragmentPreviewBinding>(R.layout.fragment_preview) {
     private val mediaAdapter = MediaAdapter(
         onItemClick = { isVideo, uri ->
             if (!isVideo) {

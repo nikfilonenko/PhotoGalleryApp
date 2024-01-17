@@ -16,14 +16,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
-import com.example.photogalleryapp.adapter.Media
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.concurrent.Executor
 
 fun ImageButton.toggleButton(
     flag: Boolean, rotationAngle: Float, @DrawableRes firstIcon: Int, @DrawableRes secondIcon: Int,

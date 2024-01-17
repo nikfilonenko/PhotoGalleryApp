@@ -85,17 +85,11 @@ abstract class BaseFragment<B : ViewBinding>(private val fragmentLayout: Int) : 
         }
     }
 
-    protected fun getMedia(): List<Media> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        getMediaQPlus()
-    } else {
-        getMediaQMinus()
-    }.reversed()
+    protected fun getMedia(): List<Media> = getMediaQPlus()
+
 
     private fun getMediaQPlus(): List<Media> {
-        val items = mutableListOf<Media>()
-        val contentResolver = requireContext().applicationContext.contentResolver
-
-        contentResolver.query(
+        val videoItems = queryMedia(
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
             arrayOf(
                 MediaStore.Video.Media._ID,
@@ -105,25 +99,9 @@ abstract class BaseFragment<B : ViewBinding>(private val fragmentLayout: Int) : 
             null,
             null,
             "${MediaStore.Video.Media.DISPLAY_NAME} ASC"
-        )?.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-            val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.RELATIVE_PATH)
-            val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_TAKEN)
+        )
 
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val path = cursor.getString(pathColumn)
-                val date = cursor.getLong(dateColumn)
-
-                val contentUri: Uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
-
-                if (path == outputDirectory) {
-                    items.add(Media(contentUri, true, date))
-                }
-            }
-        }
-
-        contentResolver.query(
+        val imageItems = queryMedia(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             arrayOf(
                 MediaStore.Images.Media._ID,
@@ -133,6 +111,22 @@ abstract class BaseFragment<B : ViewBinding>(private val fragmentLayout: Int) : 
             null,
             null,
             "${MediaStore.Images.Media.DISPLAY_NAME} ASC"
+        )
+
+        return videoItems + imageItems
+    }
+
+
+    private fun queryMedia(uri: Uri, projection: Array<String>, selection: String?, selectionArgs: Array<String>?, sortOrder: String): List<Media> {
+        val items = mutableListOf<Media>()
+        val contentResolver = requireContext().applicationContext.contentResolver
+
+        contentResolver.query(
+            uri,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder
         )?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
             val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
@@ -143,25 +137,13 @@ abstract class BaseFragment<B : ViewBinding>(private val fragmentLayout: Int) : 
                 val path = cursor.getString(pathColumn)
                 val date = cursor.getLong(dateColumn)
 
-                val contentUri: Uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                val contentUri: Uri = ContentUris.withAppendedId(uri, id)
 
                 if (path == outputDirectory) {
-                    items.add(Media(contentUri, false, date))
+                    items.add(Media(contentUri, uri == MediaStore.Video.Media.EXTERNAL_CONTENT_URI, date))
                 }
             }
         }
-        return items
-    }
-
-    private fun getMediaQMinus(): List<Media> {
-        val items = mutableListOf<Media>()
-
-        File(outputDirectory).listFiles()?.forEach {
-            val authority = requireContext().applicationContext.packageName + ".provider"
-            val mediaUri = FileProvider.getUriForFile(requireContext(), authority, it)
-            items.add(Media(mediaUri, it.extension == "mp4", it.lastModified()))
-        }
-
         return items
     }
 
