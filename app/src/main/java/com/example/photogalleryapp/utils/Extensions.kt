@@ -57,33 +57,6 @@ fun ImageButton.toggleButton(
     }
 }
 
-fun ViewGroup.circularReveal(button: ImageButton) {
-    ViewAnimationUtils.createCircularReveal(
-        this,
-        button.x.toInt() + button.width / 2,
-        button.y.toInt() + button.height / 2,
-        0f,
-        if (button.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) this.width.toFloat() else this.height.toFloat()
-    ).apply {
-        duration = 500
-        doOnStart { visibility = VISIBLE }
-    }.start()
-}
-
-fun ViewGroup.circularClose(button: ImageButton, action: () -> Unit = {}) {
-    ViewAnimationUtils.createCircularReveal(
-        this,
-        button.x.toInt() + button.width / 2,
-        button.y.toInt() + button.height / 2,
-        if (button.context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) this.width.toFloat() else this.height.toFloat(),
-        0f
-    ).apply {
-        duration = 500
-        doOnStart { action() }
-        doOnEnd { visibility = GONE }
-    }.start()
-}
-
 fun View.onWindowInsets(action: (View, WindowInsetsCompat) -> Unit) {
     ViewCompat.requestApplyInsets(this)
     ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
@@ -115,12 +88,6 @@ var View.topMargin: Int
         updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = value }
     }
 
-var View.topPadding: Int
-    get() = paddingTop
-    set(value) {
-        updateLayoutParams { setPaddingRelative(paddingStart, value, paddingEnd, paddingBottom) }
-    }
-
 var View.bottomMargin: Int
     get() = (this.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
     set(value) {
@@ -131,16 +98,4 @@ var View.endMargin: Int
     get() = (this.layoutParams as ViewGroup.MarginLayoutParams).marginEnd
     set(value) {
         updateLayoutParams<ViewGroup.MarginLayoutParams> { marginEnd = value }
-    }
-
-var View.startMargin: Int
-    get() = (this.layoutParams as ViewGroup.MarginLayoutParams).marginStart
-    set(value) {
-        updateLayoutParams<ViewGroup.MarginLayoutParams> { marginStart = value }
-    }
-
-var View.startPadding: Int
-    get() = paddingStart
-    set(value) {
-        updateLayoutParams { setPaddingRelative(value, paddingTop, paddingEnd, paddingBottom) }
     }

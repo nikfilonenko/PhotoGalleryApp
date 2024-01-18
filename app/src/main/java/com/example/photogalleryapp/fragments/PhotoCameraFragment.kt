@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.GestureDetector
 import android.view.View
 import android.widget.Toast
@@ -50,7 +49,6 @@ class PhotoCameraFragment : StoreBaseFragment() {
     private var displayId = -1
 
     private var lensFacing = CameraSelector.DEFAULT_BACK_CAMERA
-    private var hdrCameraSelector: CameraSelector? = null
 
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) = Unit
@@ -84,7 +82,7 @@ class PhotoCameraFragment : StoreBaseFragment() {
                     displayManager.unregisterDisplayListener(displayListener)
             })
 
-            btnTakePicture.setOnClickListener { takePicture() }
+            btnTakePicture.setOnClickListener { takePhoto() }
             btnGallery.setOnClickListener { openPreview() }
             btnSwitchCamera.setOnClickListener { toggleCamera() }
             flExposure.setOnClickListener { flExposure.visibility = View.GONE }
@@ -143,17 +141,17 @@ class PhotoCameraFragment : StoreBaseFragment() {
             startCamera()
 
             lifecycleScope.launch(Dispatchers.IO) {
-                setLastPictureThumbnail()
+                setLastPhoto()
             }
         }
     }
 
 
-    private fun setLastPictureThumbnail() {
+    private fun setLastPhoto() {
         val lastMedia = getMedia().firstOrNull()
 
         if (lastMedia != null) {
-            setGalleryThumbnail(lastMedia.uri)
+            setGalleryPhoto(lastMedia.uri)
         } else {
             binding.btnGallery.setImageResource(R.drawable.ic_no_picture)
         }
@@ -170,8 +168,7 @@ class PhotoCameraFragment : StoreBaseFragment() {
 
             val rotation = viewFinder.display.rotation
 
-            val localCameraProvider = cameraProvider
-                ?: throw IllegalStateException("Camera initialization failed.")
+            val localCameraProvider = cameraProvider ?: throw IllegalStateException("Camera initialization failed.")
 
             preview = Preview.Builder()
                 .setTargetRotation(rotation) // set the camera rotation
@@ -192,23 +189,19 @@ class PhotoCameraFragment : StoreBaseFragment() {
             // Unbind the use-cases before rebinding them
             localCameraProvider.unbindAll()
             // Bind all use cases to the camera with lifecycle
-            bindToLifecycle(localCameraProvider, viewFinder)
+            localCameraProvider.bindToLifecycle(
+                viewLifecycleOwner, // current lifecycle owner
+                lensFacing, // either front or back facing
+                preview, // camera preview use case
+                imageCapture, // image capture use case
+                imageAnalyzer, // image analyzer use case
+            )
+
+            preview?.setSurfaceProvider(viewFinder.surfaceProvider)
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun bindToLifecycle(localCameraProvider: ProcessCameraProvider, viewFinder: PreviewView) {
-        localCameraProvider.bindToLifecycle(
-            viewLifecycleOwner, // current lifecycle owner
-            hdrCameraSelector ?: lensFacing, // either front or back facing
-            preview, // camera preview use case
-            imageCapture, // image capture use case
-            imageAnalyzer, // image analyzer use case
-        )
-
-        preview?.setSurfaceProvider(viewFinder.surfaceProvider)
-    }
-
-    private fun takePicture() = lifecycleScope.launch(Dispatchers.Main) {
+    private fun takePhoto() = lifecycleScope.launch(Dispatchers.Main) {
         captureImage()
     }
 
@@ -240,8 +233,8 @@ class PhotoCameraFragment : StoreBaseFragment() {
                 object : OnImageSavedCallback {
                     override fun onImageSaved(outputFileResults: OutputFileResults) {
                         outputFileResults.savedUri?.let { uri ->
-                            setGalleryThumbnail(uri)
-                        } ?: setLastPictureThumbnail()
+                            setGalleryPhoto(uri)
+                        } ?: setLastPhoto()
                     }
 
                     override fun onError(exception: ImageCaptureException) {
@@ -254,7 +247,7 @@ class PhotoCameraFragment : StoreBaseFragment() {
         }
     }
 
-    private fun setGalleryThumbnail(savedUri: Uri?) {
+    private fun setGalleryPhoto(savedUri: Uri?) {
         binding.btnGallery.load(savedUri) {
             placeholder(R.drawable.ic_no_picture)
             transformations(CircleCropTransformation())

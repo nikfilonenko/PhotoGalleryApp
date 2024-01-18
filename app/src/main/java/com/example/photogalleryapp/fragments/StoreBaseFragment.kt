@@ -19,7 +19,6 @@ import com.example.photogalleryapp.adapter.Media
 import com.google.android.material.snackbar.Snackbar
 
 
-
 abstract class StoreBaseFragment : Fragment() {
 
     abstract val binding: ViewBinding
@@ -61,7 +60,6 @@ abstract class StoreBaseFragment : Fragment() {
 
     protected fun getMedia(): List<Media> = getMediaStore()
 
-
     private fun getMediaStore(): List<Media> {
         val videoProjection = arrayOf(
             MediaStore.Video.Media._ID,
@@ -79,7 +77,6 @@ abstract class StoreBaseFragment : Fragment() {
 
         return videoItems + imageItems
     }
-
 
     private fun queryMedia(uri: Uri, projection: Array<String>, selection: String?, selectionArgs: Array<String>?, sortOrder: String): List<Media> {
         val items = mutableListOf<Media>()
