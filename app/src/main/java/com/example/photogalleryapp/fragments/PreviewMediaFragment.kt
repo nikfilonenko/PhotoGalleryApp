@@ -50,9 +50,6 @@ class PreviewMediaFragment : StoreBaseFragment() {
         binding.btnDelete.setOnClickListener { deleteImage() }
     }
 
-    /**
-     * This methods adds all necessary margins to some views based on window insets and screen orientation
-     * */
     private fun adjustInsets() {
         activity?.window?.fitSystemWindows()
         binding.btnBack.onWindowInsets { view, windowInsets ->

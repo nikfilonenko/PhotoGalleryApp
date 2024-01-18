@@ -40,17 +40,11 @@ import kotlinx.coroutines.launch
 @ExperimentalCamera2Interop
 class VideoCameraFragment : StoreBaseFragment() {
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
-
     private var camera: Camera? = null
-    private var cameraProvider: ProcessCameraProvider? = null
     private var preview: Preview? = null
     private var videoCapture: VideoCapture<Recorder>? = null
-
     private var displayId = -1
-
     private var lensFacing = CameraSelector.DEFAULT_BACK_CAMERA
-
-
     private var isRecording = false
     private val animateRecord by lazy {
         ObjectAnimator.ofFloat(binding.btnRecordVideo, View.ALPHA, 1f, 0.5f).apply {
@@ -66,12 +60,14 @@ class VideoCameraFragment : StoreBaseFragment() {
         override fun onDisplayAdded(displayId: Int) = Unit
         override fun onDisplayRemoved(displayId: Int) = Unit
 
-        override fun onDisplayChanged(displayId: Int) = view?.let { view ->
-            if (displayId == this@VideoCameraFragment.displayId) {
-                preview?.targetRotation = view.display.rotation
-                videoCapture?.targetRotation = view.display.rotation
+        override fun onDisplayChanged(displayId: Int) {
+            view?.let { view ->
+                if (displayId == this@VideoCameraFragment.displayId) {
+                    preview?.targetRotation = view.display.rotation
+                    videoCapture?.targetRotation = view.display.rotation
+                }
             }
-        } ?: Unit
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -106,7 +102,6 @@ class VideoCameraFragment : StoreBaseFragment() {
         }
     }
 
-
     private fun initViews() {
         adjustInsets()
     }
@@ -121,7 +116,6 @@ class VideoCameraFragment : StoreBaseFragment() {
             }
         }
     }
-
 
     private fun toggleCamera() = binding.btnSwitchCamera.toggleButton(
         flag = lensFacing == CameraSelector.DEFAULT_BACK_CAMERA,
@@ -140,26 +134,20 @@ class VideoCameraFragment : StoreBaseFragment() {
 
 
     private fun startCamera() {
-        // This is the Texture View where the camera will be rendered
         val viewFinder = binding.viewFinder
-
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
+
         cameraProviderFuture.addListener({
-            cameraProvider = cameraProviderFuture.get()
+            val localCameraProvider = cameraProviderFuture.get()
 
-            val rotation = viewFinder.display.rotation
-
-            val localCameraProvider = cameraProvider
-                ?: throw IllegalStateException("Camera initialization failed.")
-
-            // The Configuration of camera preview
+            // Configuration for camera preview
             preview = Preview.Builder()
-                .setTargetRotation(rotation) // set the camera rotation
+                .setTargetRotation(viewFinder.display.rotation)
                 .build()
 
+            // Filter camera info for back-facing camera
             val cameraInfo = localCameraProvider.availableCameraInfos.filter {
-                Camera2CameraInfo
-                    .from(it)
+                Camera2CameraInfo.from(it)
                     .getCameraCharacteristic(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_BACK
             }
 
@@ -167,25 +155,29 @@ class VideoCameraFragment : StoreBaseFragment() {
                 listOf(Quality.UHD, Quality.FHD, Quality.HD, Quality.SD),
                 FallbackStrategy.lowerQualityOrHigherThan(Quality.SD)
             )
+
+            // Create video capture with recorder
             val recorder = Recorder.Builder()
-                .setExecutor(ContextCompat.getMainExecutor(requireContext())).setQualitySelector(qualitySelector)
+                .setExecutor(ContextCompat.getMainExecutor(requireContext()))
+                .setQualitySelector(qualitySelector)
                 .build()
             videoCapture = VideoCapture.withOutput(recorder)
 
-            localCameraProvider.unbindAll() // unbind the use-cases before rebinding them
+            localCameraProvider.unbindAll() // Unbind use-cases before rebinding them
 
-            // Bind all use cases to the camera with lifecycle
+            // Bind all use-cases to the camera with lifecycle
             camera = localCameraProvider.bindToLifecycle(
-                viewLifecycleOwner, // current lifecycle owner
-                lensFacing, // either front or back facing
-                preview, // camera preview use case
-                videoCapture, // video capture use case
+                viewLifecycleOwner,
+                lensFacing,
+                preview,
+                videoCapture
             )
 
-            // Attach the viewfinder's surface provider to preview use case
+            // Attach the viewfinder's surface provider to the preview use case
             preview?.setSurfaceProvider(viewFinder.surfaceProvider)
         }, ContextCompat.getMainExecutor(requireContext()))
     }
+
 
     private fun openPreview() {
         view?.let { Navigation.findNavController(it).navigate(R.id.action_video_to_preview) }
@@ -193,16 +185,12 @@ class VideoCameraFragment : StoreBaseFragment() {
 
     private var recording: Recording? = null
 
-
     @SuppressLint("MissingPermission")
     private fun recordVideo() {
         if (isRecording) {
-            // Если запись уже активна, останавливаем ее
             animateRecord.cancel()
             recording?.stop()
-            isRecording = false
         } else {
-            // Если запись не активна, начинаем новую запись
             val name = "CosmoFocus-${System.currentTimeMillis()}.mp4"
             val contentValues = ContentValues().apply {
                 put(MediaStore.Video.Media.DISPLAY_NAME, name)
@@ -213,34 +201,26 @@ class VideoCameraFragment : StoreBaseFragment() {
             )
                 .setContentValues(contentValues)
                 .build()
-            recording = videoCapture?.output
-                ?.prepareRecording(requireContext(), mediaStoreOutput)
+
+            recording = videoCapture?.output?.prepareRecording(requireContext(), mediaStoreOutput)
                 ?.withAudioEnabled()
                 ?.start(ContextCompat.getMainExecutor(requireContext())) { event ->
-                    when (event) {
-                        is VideoRecordEvent.Start -> {
-                            animateRecord.start()
-                        }
+                    if (event is VideoRecordEvent.Start) {
+                        animateRecord.start()
                     }
                 }
-            isRecording = true
         }
+        isRecording = !isRecording
     }
 
-
     override fun onPermissionGranted() {
-        // Each time apps is coming to foreground the need permission check is being processed
-        binding.viewFinder.let { vf ->
-            vf.post {
-                // Setting current display ID
-                displayId = vf.display.displayId
-                startCamera()
-                lifecycleScope.launch(Dispatchers.IO) {
-                    // Do on IO Dispatcher
-                    setLastPhoto()
-                }
-                camera?.cameraControl
+        binding.viewFinder.post {
+            displayId = binding.viewFinder.display.displayId
+            startCamera()
+            lifecycleScope.launch(Dispatchers.IO) {
+                setLastPhoto()
             }
+            camera?.cameraControl
         }
     }
 

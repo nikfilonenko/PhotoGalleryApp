@@ -38,18 +38,12 @@ import com.example.photogalleryapp.utils.toggleButton
 class PhotoCameraFragment : StoreBaseFragment() {
     // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
-
     private var preview: Preview? = null
-    private var cameraProvider: ProcessCameraProvider? = null
     private var imageCapture: ImageCapture? = null
     private var imageAnalyzer: ImageAnalysis? = null
-
     override val binding: FragmentCameraBinding by lazy { FragmentCameraBinding.inflate(layoutInflater) }
-
     private var displayId = -1
-
     private var lensFacing = CameraSelector.DEFAULT_BACK_CAMERA
-
     private val displayListener = object : DisplayManager.DisplayListener {
         override fun onDisplayAdded(displayId: Int) = Unit
         override fun onDisplayRemoved(displayId: Int) = Unit
@@ -85,7 +79,6 @@ class PhotoCameraFragment : StoreBaseFragment() {
             btnTakePicture.setOnClickListener { takePhoto() }
             btnGallery.setOnClickListener { openPreview() }
             btnSwitchCamera.setOnClickListener { toggleCamera() }
-            flExposure.setOnClickListener { flExposure.visibility = View.GONE }
 
             val swipeGestures = SwipeGestureDetector().apply {
                 setSwipeCallback(right = {
@@ -134,7 +127,6 @@ class PhotoCameraFragment : StoreBaseFragment() {
         view?.let { Navigation.findNavController(it).navigate(R.id.action_camera_to_preview) }
     }
 
-
     override fun onPermissionGranted() {
         binding.viewFinder.post {
             displayId = binding.viewFinder.display.displayId
@@ -159,47 +151,41 @@ class PhotoCameraFragment : StoreBaseFragment() {
 
 
     private fun startCamera() {
-        // This is the CameraX PreviewView where the camera will be rendered
         val viewFinder = binding.viewFinder
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
-            cameraProvider = cameraProviderFuture.get()
+            val cameraProvider = cameraProviderFuture.get()
 
             val rotation = viewFinder.display.rotation
 
-            val localCameraProvider = cameraProvider ?: throw IllegalStateException("Camera initialization failed.")
-
-            preview = Preview.Builder()
-                .setTargetRotation(rotation) // set the camera rotation
+            val preview = Preview.Builder()
+                .setTargetRotation(rotation)
                 .build()
 
-            // The Configuration of image capture
-            imageCapture = Builder()
-                .setCaptureMode(CAPTURE_MODE_MAXIMIZE_QUALITY) // setting to have pictures with highest quality possible (may be slow)
-                .setTargetRotation(rotation) // set the capture rotation
+            imageCapture = ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                .setTargetRotation(rotation)
                 .build()
 
-            // The Configuration of image analyzing
             imageAnalyzer = ImageAnalysis.Builder()
-                .setTargetRotation(rotation) // set the analyzer rotation
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) // in our analysis, we care about the latest image
+                .setTargetRotation(rotation)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
 
-            // Unbind the use-cases before rebinding them
-            localCameraProvider.unbindAll()
-            // Bind all use cases to the camera with lifecycle
-            localCameraProvider.bindToLifecycle(
-                viewLifecycleOwner, // current lifecycle owner
-                lensFacing, // either front or back facing
-                preview, // camera preview use case
-                imageCapture, // image capture use case
-                imageAnalyzer, // image analyzer use case
+            cameraProvider?.unbindAll()
+            cameraProvider?.bindToLifecycle(
+                viewLifecycleOwner,
+                lensFacing,
+                preview,
+                imageCapture,
+                imageAnalyzer
             )
 
-            preview?.setSurfaceProvider(viewFinder.surfaceProvider)
+            preview.setSurfaceProvider(viewFinder.surfaceProvider)
         }, ContextCompat.getMainExecutor(requireContext()))
     }
+
 
     private fun takePhoto() = lifecycleScope.launch(Dispatchers.Main) {
         captureImage()
