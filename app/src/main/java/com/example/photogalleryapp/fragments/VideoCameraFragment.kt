@@ -27,7 +27,7 @@ import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.photogalleryapp.R
 import com.example.photogalleryapp.databinding.FragmentVideoBinding
-import com.example.photogalleryapp.utils.SwipeGestureDetector
+import com.example.photogalleryapp.utils.SwipeDetector
 import com.example.photogalleryapp.utils.bottomMargin
 import com.example.photogalleryapp.utils.endMargin
 import com.example.photogalleryapp.utils.fitSystemWindows
@@ -90,11 +90,10 @@ class VideoCameraFragment : StoreBaseFragment() {
             btnGallery.setOnClickListener { openPreview() }
             btnSwitchCamera.setOnClickListener { toggleCamera() }
 
-            val swipeGestures = SwipeGestureDetector().apply {
-                setSwipeCallback(left = {
-                    Navigation.findNavController(view).navigate(R.id.action_video_to_camera)
-                })
-            }
+            val swipeGestures = SwipeDetector(
+                onLeftSwipe = {Navigation.findNavController(view).navigate(R.id.action_video_to_camera)},
+                onRightSwipe = {}
+            )
             val gestureDetectorCompat = GestureDetector(requireContext(), swipeGestures)
             viewFinder.setOnTouchListener { _, motionEvent ->
                 !gestureDetectorCompat.onTouchEvent(motionEvent)

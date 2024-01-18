@@ -15,7 +15,6 @@ import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -27,7 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import com.example.photogalleryapp.R
-import com.example.photogalleryapp.utils.SwipeGestureDetector
+import com.example.photogalleryapp.utils.SwipeDetector
 import com.example.photogalleryapp.utils.bottomMargin
 import com.example.photogalleryapp.utils.endMargin
 import com.example.photogalleryapp.utils.fitSystemWindows
@@ -36,7 +35,6 @@ import com.example.photogalleryapp.utils.toggleButton
 
 
 class PhotoCameraFragment : StoreBaseFragment() {
-    // An instance for display manager to get display change callbacks
     private val displayManager by lazy { requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager }
     private var preview: Preview? = null
     private var imageCapture: ImageCapture? = null
@@ -80,11 +78,12 @@ class PhotoCameraFragment : StoreBaseFragment() {
             btnGallery.setOnClickListener { openPreview() }
             btnSwitchCamera.setOnClickListener { toggleCamera() }
 
-            val swipeGestures = SwipeGestureDetector().apply {
-                setSwipeCallback(right = {
+            val swipeGestures = SwipeDetector(
+                onLeftSwipe = {},
+                onRightSwipe = {
                     Navigation.findNavController(view).navigate(R.id.action_camera_to_video)
-                })
-            }
+                }
+            )
             val gestureDetectorCompat = GestureDetector(requireContext(), swipeGestures)
             viewFinder.setOnTouchListener { _, motionEvent ->
                 !gestureDetectorCompat.onTouchEvent(motionEvent)

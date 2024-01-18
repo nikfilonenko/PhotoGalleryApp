@@ -17,20 +17,18 @@ class PreviewMediaFragment : StoreBaseFragment() {
     private val mediaAdapter = MediaAdapter(
         onItemClick = { isVideo, uri ->
             if (!isVideo) {
-                val visibility = if (binding.groupPreviewActions.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-                binding.groupPreviewActions.visibility = visibility
+                binding.groupPreviewActions.visibility = if (binding.groupPreviewActions.visibility == View.VISIBLE) View.GONE else View.VISIBLE
             } else {
-                val play = Intent(Intent.ACTION_VIEW, uri).apply { setDataAndType(uri, "video/mp4") }
-                startActivity(play)
+                startActivity(Intent(Intent.ACTION_VIEW, uri).apply { setDataAndType(uri, "video/mp4") })
             }
         },
         onDeleteClick = { isEmpty, uri ->
             if (isEmpty) onBackPressed()
 
-            val resolver = requireContext().applicationContext.contentResolver
-            resolver.delete(uri, null, null)
-        },
+            requireContext().applicationContext.contentResolver.delete(uri, null, null)
+        }
     )
+
     private var currentPage = 0
     override val binding: FragmentPreviewBinding by lazy { FragmentPreviewBinding.inflate(layoutInflater) }
 
@@ -38,12 +36,9 @@ class PreviewMediaFragment : StoreBaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         adjustInsets()
 
-        // Check for the permissions and show files
         if (allPermissionsGranted()) {
-            binding.pagerPhotos.apply {
-                adapter = mediaAdapter.apply { submitList(getMedia()) }
-                onPageSelected { page -> currentPage = page }
-            }
+            binding.pagerPhotos.adapter = mediaAdapter.apply { submitList(getMedia()) }
+            binding.pagerPhotos.onPageSelected { currentPage = it }
         }
 
         binding.btnBack.setOnClickListener { onBackPressed() }
