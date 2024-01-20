@@ -62,46 +62,53 @@ abstract class StoreBaseFragment : Fragment() {
     protected fun getMedia(): List<Media> = getMediaStore()
 
     private fun getMediaStore(): List<Media> {
-        val videoProjection = arrayOf(
-            MediaStore.Video.Media._ID,
-            MediaStore.Video.Media.RELATIVE_PATH,
-            MediaStore.Video.Media.DATE_TAKEN
-        )
-        val imageProjection = arrayOf(
+        val mediaList = mutableListOf<Media>()
+
+        val projection = arrayOf(
             MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.RELATIVE_PATH,
-            MediaStore.Images.Media.DATE_TAKEN
+            MediaStore.Images.Media.DATA,
+            MediaStore.Images.Media.DATE_ADDED,
+            MediaStore.Images.Media.MIME_TYPE
         )
 
-        val videoItems = queryMedia(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videoProjection, null, null, "${MediaStore.Video.Media.DISPLAY_NAME} ASC")
-        val imageItems = queryMedia(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, imageProjection, null, null, "${MediaStore.Images.Media.DISPLAY_NAME} ASC")
+        val selection = "${MediaStore.Files.FileColumns.MEDIA_TYPE} = ? OR ${MediaStore.Files.FileColumns.MEDIA_TYPE} = ?"
+        val selectionArgs = arrayOf(
+            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(),
+            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString()
+        )
 
-        return videoItems + imageItems
-    }
+        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
 
-    private fun queryMedia(uri: Uri, projection: Array<String>, selection: String?, selectionArgs: Array<String>?, sortOrder: String): List<Media> {
-        val items = mutableListOf<Media>()
-        val contentResolver = requireContext().applicationContext.contentResolver
+        val queryUri: Uri = MediaStore.Files.getContentUri("external")
 
-        contentResolver.query(uri, projection, selection, selectionArgs, sortOrder)?.use { cursor ->
+        context?.contentResolver?.query(
+            queryUri,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder
+        )?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-            val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
-            val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
+            val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
+            val mimeTypeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)
 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
-                val path = cursor.getString(pathColumn)
                 val date = cursor.getLong(dateColumn)
+                val mimeType = cursor.getString(mimeTypeColumn)
 
-                val contentUri: Uri = ContentUris.withAppendedId(uri, id)
+                val uri = ContentUris.withAppendedId(
+                    if (mimeType.startsWith("video")) MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    else MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
+                )
 
-                if (path == outputDirectory) {
-                    items.add(Media(contentUri, uri == MediaStore.Video.Media.EXTERNAL_CONTENT_URI, date))
-                }
+                val isVideo = mimeType.startsWith("video")
+
+                mediaList.add(Media(uri, isVideo, date))
             }
         }
 
-        return items
+        return mediaList
     }
 
     protected fun allPermissionsGranted() = permissions.all {
