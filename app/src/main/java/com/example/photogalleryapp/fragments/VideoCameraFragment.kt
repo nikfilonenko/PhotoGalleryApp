@@ -87,7 +87,7 @@ class VideoCameraFragment : StoreBaseFragment() {
                     displayManager.unregisterDisplayListener(displayListener)
             })
             binding.btnRecordVideo.setOnClickListener { recordVideo() }
-            btnGallery.setOnClickListener { openPreview() }
+            btnGallery.setOnClickListener { openGallery() }
             btnSwitchCamera.setOnClickListener { toggleCamera() }
 
             val swipeGestures = SwipeDetector(
@@ -178,8 +178,8 @@ class VideoCameraFragment : StoreBaseFragment() {
     }
 
 
-    private fun openPreview() {
-        view?.let { Navigation.findNavController(it).navigate(R.id.action_video_to_preview) }
+    private fun openGallery() {
+        view?.let { Navigation.findNavController(it).navigate(R.id.action_camera_to_gallery) }
     }
 
     private var recording: Recording? = null

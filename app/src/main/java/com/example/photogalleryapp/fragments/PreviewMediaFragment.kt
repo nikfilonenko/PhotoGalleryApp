@@ -1,6 +1,7 @@
 package com.example.photogalleryapp.fragments
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.WindowInsetsCompat
@@ -40,6 +41,9 @@ class PreviewMediaFragment : StoreBaseFragment() {
             binding.pagerPhotos.adapter = mediaAdapter.apply { submitList(getMedia()) }
             binding.pagerPhotos.onPageSelected { currentPage = it }
         }
+
+        val uriString = arguments?.let { PreviewMediaFragmentArgs.fromBundle(it).mediaUri }
+        val mediaUri = Uri.parse(uriString)
 
         binding.btnBack.setOnClickListener { onBackPressed() }
         binding.btnDelete.setOnClickListener { deleteImage() }

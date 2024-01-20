@@ -75,7 +75,7 @@ class PhotoCameraFragment : StoreBaseFragment() {
             })
 
             btnTakePicture.setOnClickListener { takePhoto() }
-            btnGallery.setOnClickListener { openPreview() }
+            btnGallery.setOnClickListener { openGallery() }
             btnSwitchCamera.setOnClickListener { toggleCamera() }
 
             val swipeGestures = SwipeDetector(
@@ -121,9 +121,9 @@ class PhotoCameraFragment : StoreBaseFragment() {
         startCamera()
     }
 
-    private fun openPreview() {
+    private fun openGallery() {
         if (getMedia().isEmpty()) return
-        view?.let { Navigation.findNavController(it).navigate(R.id.action_camera_to_preview) }
+        view?.let { Navigation.findNavController(it).navigate(R.id.action_camera_to_gallery) }
     }
 
     override fun onPermissionGranted() {
