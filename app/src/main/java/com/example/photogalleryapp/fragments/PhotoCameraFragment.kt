@@ -137,7 +137,6 @@ class PhotoCameraFragment : StoreBaseFragment() {
         }
     }
 
-
     private fun setLastPhoto() {
         val lastMedia = getMedia().firstOrNull()
 

@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#3D3D3D"
     android:fitsSystemWindows="true"
     tools:context="com.example.photogalleryapp.fragments.GalleryFragment">
@@ -25,4 +26,10 @@
         android:horizontalSpacing="1dp"
         android:verticalSpacing="1dp"
         android:numColumns="2" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/groupPreviewActions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="btnBack" />
 </RelativeLayout>
