@@ -192,7 +192,6 @@ class PhotoCameraFragment : StoreBaseFragment() {
     private fun captureImage() {
         val localImageCapture = imageCapture ?: throw IllegalStateException("Camera initialization failed.")
 
-        // Options for the output image file
         val outputOptions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, System.currentTimeMillis())

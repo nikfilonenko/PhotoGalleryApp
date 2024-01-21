@@ -1,6 +1,5 @@
 package com.example.photogalleryapp.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,9 +13,11 @@ class GalleryFragment : StoreBaseFragment() {
     private val mediaAdapter = MediaAdapter(
         onItemClick = { isVideo, uri ->
             if (!isVideo) {
-                binding.groupPreviewActions.visibility = if (binding.groupPreviewActions.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                val action = GalleryFragmentDirections.actionGalleryToPhotoPreview(uri.toString())
+                Navigation.findNavController(requireView()).navigate(action)
             } else {
-                startActivity(Intent(Intent.ACTION_VIEW, uri).apply { setDataAndType(uri, "video/mp4") })
+                val action = GalleryFragmentDirections.actionGalleryToVideoPreview(uri.toString())
+                Navigation.findNavController(requireView()).navigate(action)
             }
         },
         onDeleteClick = { isEmpty, uri ->
@@ -34,7 +35,6 @@ class GalleryFragment : StoreBaseFragment() {
     ): View {
         return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

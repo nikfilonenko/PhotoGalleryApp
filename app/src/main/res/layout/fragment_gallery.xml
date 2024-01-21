@@ -16,7 +16,6 @@
         android:padding="@dimen/fab_margin"
         android:src="@drawable/ic_arrow_back" />
 
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewGallery"
         android:layout_width="match_parent"

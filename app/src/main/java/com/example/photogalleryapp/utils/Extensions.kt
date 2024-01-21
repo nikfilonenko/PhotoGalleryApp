@@ -2,8 +2,6 @@ package com.example.photogalleryapp.utils
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -13,7 +11,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.viewpager2.widget.ViewPager2
 
 fun ImageButton.toggleButton(
     flag: Boolean, rotationAngle: Float, @DrawableRes firstIcon: Int, @DrawableRes secondIcon: Int,
@@ -43,23 +40,6 @@ fun Window.fitSystemWindows() {
     WindowCompat.setDecorFitsSystemWindows(this, false)
 }
 
-fun ViewPager2.onPageSelected(action: (Int) -> Unit) {
-    registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-        override fun onPageSelected(position: Int) {
-            super.onPageSelected(position)
-            action(position)
-        }
-    })
-}
-
-val Context.layoutInflater: LayoutInflater
-    get() = LayoutInflater.from(this)
-
-var View.topMargin: Int
-    get() = (layoutParams as ViewGroup.MarginLayoutParams).topMargin
-    set(value) {
-        updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = value }
-    }
 
 var View.bottomMargin: Int
     get() = (layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
